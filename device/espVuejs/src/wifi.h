@@ -3,7 +3,9 @@
 #include <ArduinoJson.h>
 #include "store.h"
 #include "webserver.h"
+#ifndef APID
 #define APID "vocaui-wl"
+#endif
 #define APPW "12345678"
 #define MASSTER_SSID "voca-master"
 void scanWifi();
