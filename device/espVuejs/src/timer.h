@@ -18,7 +18,7 @@ void setupTimer(){
   gotTime = timeClient.update();
   if(gotTime)
     setValue("lastTime", timeClient.getFormattedTime());
-  // Serial.println(timeClient.getFormattedTime());
+  // //Serial.println(timeClient.getFormattedTime());
 }
 
 void loopTimer() {

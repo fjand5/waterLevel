@@ -19,7 +19,7 @@ std::map <String, String> Store;
 bool loadConfig() {
   File configFile = LittleFS.open(STORE_FILE_NAME, "r");
   if (!configFile) {
-    Serial.println("Failed to open config file");
+    //Serial.println("Failed to open config file");
     return false;
   }
 
@@ -38,7 +38,7 @@ bool loadConfig() {
   JsonObject objData;
   if (error) {
     objData = doc.to<JsonObject>();
-    Serial.println("Failed to parse config file");
+    //Serial.println("Failed to parse config file");
   }
   objData = doc.as<JsonObject>();
   for (JsonPair kv : objData) {
@@ -60,7 +60,7 @@ bool saveConfig() {
 
   File configFile = LittleFS.open(STORE_FILE_NAME, "w");
   if (!configFile) {
-    Serial.println("Failed to open config file for writing");
+    //Serial.println("Failed to open config file for writing");
     return false;
   }
 
@@ -99,22 +99,22 @@ const char * getValueByCStr(String key){
   return ret;
 }
 void setupStore() {
-  Serial.println("");
+  //Serial.println("");
   delay(1000);
-  Serial.println("Mounting FS...");
+  //Serial.println("Mounting FS...");
 
   if (!LittleFS.begin()) {
-    Serial.println("Failed to mount file system");
+    //Serial.println("Failed to mount file system");
     LittleFS.format();
-    Serial.println("Try formatting...");
+    //Serial.println("Try formatting...");
     if (!LittleFS.begin()) {
       return;
     }
   }
-  Serial.println("Mounted");
+  //Serial.println("Mounted");
   if (!loadConfig()) {
-    Serial.println("Failed to load config");
+    //Serial.println("Failed to load config");
   } else {
-    Serial.println("Config loaded");
+    //Serial.println("Config loaded");
   }
 }

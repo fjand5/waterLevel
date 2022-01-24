@@ -49,7 +49,7 @@ void setupWebserver(){
       HTTPUpload& upload = server.upload();
       if (upload.status == UPLOAD_FILE_START) {
         Serial.setDebugOutput(true);
-        Serial.printf("Update: %s\n", upload.filename.c_str());
+        //Serial.printf("Update: %s\n", upload.filename.c_str());
         uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
         if (!Update.begin(maxSketchSpace)) { //start with max available size
           Update.printError(Serial);
@@ -60,7 +60,7 @@ void setupWebserver(){
         }
       } else if (upload.status == UPLOAD_FILE_END) {
         if (Update.end(true)) { //true to set the size to the current progress
-          Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
+          //Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
           // ESP.restart();
         } else {
           Update.printError(Serial);

@@ -14,7 +14,7 @@ void setup(void)
 {
   delay(111);
   Serial.begin(115200);
-  Serial.println("booted");
+  //Serial.println("booted");
 
   setupStore();
   setOnStoreChange([](String id, String val, bool isChange)
@@ -28,13 +28,13 @@ void setup(void)
                      webSocket.broadcastTXT(ret);
                      mqttClient.publish((getValue("_mqttUser") + "/waterLevel/" + id).c_str(), (const uint8_t *)val.c_str(), val.length(), true); });
 
-  Serial.println("findMaster");
+  //Serial.println("findMaster");
 
   if(findMaster()){
     ignoreSleep = true;
   }
-  Serial.print(ignoreSleep);
-  Serial.println("findMaster done");
+  //Serial.print(ignoreSleep);
+  //Serial.println("findMaster done");
   setupWifi();
   setupWebserver();
   setupUpdate();
@@ -46,9 +46,9 @@ void setup(void)
 
   loopFloatLevel();
   loopBattery();
-  Serial.println("wait to sleep ignoreSleep");
+  //Serial.println("wait to sleep ignoreSleep");
   delay(1000);
-  Serial.println("sleeped");
+  //Serial.println("sleeped");
 
   if (!ignoreSleep && getBatteryVoltage() < 3.7) // sleep mode
   {
@@ -80,7 +80,7 @@ void setup(void)
   }
 
   // setOnMqttIncome([](String topic, String msg){
-  //   Serial.println(topic + ": "+ msg);
+  //   //Serial.println(topic + ": "+ msg);
   //   DynamicJsonDocument doc(512);
   //   auto error = deserializeJson(doc, msg);
   //   if(error)
@@ -94,7 +94,7 @@ void setup(void)
 
   // });
   // setOnWSTextIncome([](String msg){
-  //   Serial.println(msg);
+  //   //Serial.println(msg);
   //   DynamicJsonDocument doc(512);
   //   auto error = deserializeJson(doc, msg);
   //   if(error)

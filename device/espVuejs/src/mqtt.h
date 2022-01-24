@@ -35,19 +35,19 @@ void reconnect() {
     || !checkKey("_mqttPwd") 
     )
       return;
-    Serial.print("Attempting MQTT connection...");
+    //Serial.print("Attempting MQTT connection...");
     String clientId = "ESP8266Client-";
     clientId += String(random(0xffff), HEX);
     mqttClient.setServer(getValueByCStr("_mqttAddr"), getValue("_mqttPort").toInt()) ;
     if (mqttClient.connect(clientId.c_str(), getValue("_mqttUser").c_str(), getValue("_mqttPwd").c_str(),
     (getValue("_mqttUser") + "/waterLevel/isOnline").c_str(), 1, true, "offline"
     )) {
-      Serial.println("connected");
+      //Serial.println("connected");
       mqttClient.publish((getValue("_mqttUser") + "/waterLevel/isOnline").c_str(), (const uint8_t*)"true", 4, true);
       mqttClient.subscribe("#");
     } else {
-      Serial.print("failed, rc=");
-      Serial.print(mqttClient.state());
+      //Serial.print("failed, rc=");
+      //Serial.print(mqttClient.state());
     }
 }
 void setupMqtt() {

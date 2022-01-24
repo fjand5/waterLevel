@@ -1,5 +1,5 @@
-#define BELL_PIN 3
-#define APID  "vocaui-bell"
+#define BELL_PIN 2
+#define APID "vocaui-bell"
 
 #include <Arduino.h>
 #include "webserver.h"
@@ -10,11 +10,27 @@
 #include "mqtt.h"
 #include "system.h"
 #include "timer.h"
+#include "Ticker.h"
+Ticker ringTheBellTicker;
+void ringTheBell()
+{
+    static uint32_t count = 0;
+    if (count % 100 == 0)
+    {
+
+        digitalWrite(BELL_PIN, HIGH);
+    }
+    else
+    {
+        digitalWrite(BELL_PIN, LOW);
+    }
+    count++;
+}
 void setup(void)
 {
     delay(111);
-    Serial.begin(115200);
-    Serial.println("booted");
+    // Serial.begin(115200);
+    // //Serial.println("booted");
     pinMode(BELL_PIN, OUTPUT);
     digitalWrite(BELL_PIN, LOW);
 
@@ -26,20 +42,20 @@ void setup(void)
     setupSystem();
     setupMqtt();
     setupTimer();
-    Serial.println("wait to sleep ignoreSleep");
+    // //Serial.println("wait to sleep ignoreSleep");
     delay(1000);
     setOnMqttIncome([](String topic, String msg)
                     {
         if(topic == "cafevongcat/waterLevel/lowLevel"
         && msg == "0"
         ){
-            digitalWrite(BELL_PIN, HIGH);
+            ringTheBellTicker.attach_ms(100, ringTheBell);
         } 
         
                if(topic == "cafevongcat/waterLevel/lowLevel"
         && msg == "1"
         ){
-            digitalWrite(BELL_PIN, LOW);
+            ringTheBellTicker.detach();
         } });
 }
 void loop(void)

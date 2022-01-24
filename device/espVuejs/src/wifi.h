@@ -24,26 +24,26 @@ void setupWifi(void)
     WiFi.softAP(APID, APPW);
   }
   WiFi.begin(getValue("_ssid"), getValue("_sspw"));
-  Serial.println("");
+  //Serial.println("");
 
   // Wait for connection
   while (WiFi.status() != WL_CONNECTED && millis() < 30000)
   {
     delay(500);
-    Serial.print(".");
+    //Serial.print(".");
   }
   if (WiFi.status() != WL_CONNECTED)
   {
     WiFi.mode(WIFI_AP);
-    Serial.println("Only AP mode");
+    //Serial.println("Only AP mode");
   }
   else
   {
-    Serial.println("");
-    Serial.print("Connected to ");
-    Serial.println(getValue("_ssid"));
-    Serial.print("IP address: ");
-    Serial.println(WiFi.localIP());
+    //Serial.println("");
+    //Serial.print("Connected to ");
+    //Serial.println(getValue("_ssid"));
+    //Serial.print("IP address: ");
+    //Serial.println(WiFi.localIP());
   }
   addHttpApi("scanWifi", scanWifi);
   addHttpApi("setWifi", setWifi);
@@ -66,17 +66,17 @@ void scanWifi()
   bool hidden;
   int scanResult;
 
-  Serial.println(F("Starting WiFi scan..."));
+  //Serial.println(F("Starting WiFi scan..."));
 
   scanResult = WiFi.scanNetworks(/*async=*/false, /*hidden=*/true);
 
   if (scanResult == 0)
   {
-    Serial.println(F("No networks found"));
+    //Serial.println(F("No networks found"));
   }
   else if (scanResult > 0)
   {
-    Serial.printf(PSTR("%d networks found:\n"), scanResult);
+    //Serial.printf(PSTR("%d networks found:\n"), scanResult);
 
     // Print unsorted scan results
     for (int8_t i = 0; i < scanResult; i++)
@@ -87,21 +87,21 @@ void scanWifi()
       nestedObj["rssi"] = rssi;
       nestedObj["hidden"] = hidden;
 
-      Serial.printf(PSTR("  %02d: [CH %02d] [%02X:%02X:%02X:%02X:%02X:%02X] %ddBm %c %c %s\n"),
-                    i,
-                    channel,
-                    bssid[0], bssid[1], bssid[2],
-                    bssid[3], bssid[4], bssid[5],
-                    rssi,
-                    (encryptionType == ENC_TYPE_NONE) ? ' ' : '*',
-                    hidden ? 'H' : 'V',
-                    ssid.c_str());
+      //Serial.printf(PSTR("  %02d: [CH %02d] [%02X:%02X:%02X:%02X:%02X:%02X] %ddBm %c %c %s\n"),
+                    // i,
+                    // channel,
+                    // bssid[0], bssid[1], bssid[2],
+                    // bssid[3], bssid[4], bssid[5],
+                    // rssi,
+                    // (encryptionType == ENC_TYPE_NONE) ? ' ' : '*',
+                    // hidden ? 'H' : 'V',
+                    // ssid.c_str());
       delay(0);
     }
   }
   else
   {
-    Serial.printf(PSTR("WiFi scan error %d"), scanResult);
+    //Serial.printf(PSTR("WiFi scan error %d"), scanResult);
   }
   String ret;
   serializeJson(array, ret);
