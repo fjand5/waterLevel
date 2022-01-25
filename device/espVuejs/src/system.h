@@ -5,4 +5,7 @@ void setupSystem(){
         delay(500); // chờ send thành công.
         ESP.reset();
     });
+    addHttpApi("/reset2/",[](){
+        server.send(200);
+    });
 }

@@ -4,18 +4,27 @@
 #define HIGH_LEVEL_PIN D7
 #define LOW_LEVEL_PIN D6
 
-void setupFloatLevel()
+// có sự thay đổi thì trả về true
+bool setupFloatLevel()
 {
+    bool ret;
     pinMode(HIGH_LEVEL_PIN, INPUT_PULLUP);
     pinMode(LOW_LEVEL_PIN, INPUT_PULLUP);
     delay(111);
-    setValue("highLevel", String(digitalRead(HIGH_LEVEL_PIN)));
-    setValue("lowLevel", String(digitalRead(LOW_LEVEL_PIN)));
+    if(getValue("highLevel") == String(digitalRead(HIGH_LEVEL_PIN))
+    && getValue("lowLevel") == String(digitalRead(LOW_LEVEL_PIN))
+    ){
+        ret = false;
+    }else{
+        ret = true;
+    }
+    return ret;
+
 }
 uint32_t floatLevelTimer = millis();
-void loopFloatLevel()
+void loopFloatLevel(bool now = false)
 {
-    if (millis() - floatLevelTimer > 1000)
+    if (millis() - floatLevelTimer > 1000 || now)
     {
 
         setValue("highLevel", String(digitalRead(HIGH_LEVEL_PIN)));

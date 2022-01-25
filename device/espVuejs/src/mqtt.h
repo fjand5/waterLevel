@@ -39,16 +39,30 @@ void reconnect() {
     String clientId = "ESP8266Client-";
     clientId += String(random(0xffff), HEX);
     mqttClient.setServer(getValueByCStr("_mqttAddr"), getValue("_mqttPort").toInt()) ;
+    #ifdef BELL_BOARD
     if (mqttClient.connect(clientId.c_str(), getValue("_mqttUser").c_str(), getValue("_mqttPwd").c_str(),
-    (getValue("_mqttUser") + "/waterLevel/isOnline").c_str(), 1, true, "offline"
+    (getValue("_mqttUser") + "/waterLevelBell/isOnline").c_str(), 1, true, "offline"
     )) {
       //Serial.println("connected");
-      mqttClient.publish((getValue("_mqttUser") + "/waterLevel/isOnline").c_str(), (const uint8_t*)"true", 4, true);
+      mqttClient.publish((getValue("_mqttUser") + "/waterLevelBell/isOnline").c_str(), (const uint8_t*)"true", 4, true);
       mqttClient.subscribe("#");
     } else {
       //Serial.print("failed, rc=");
       //Serial.print(mqttClient.state());
     }
+    #endif
+        #ifdef TANK_BOARD
+    if (mqttClient.connect(clientId.c_str(), getValue("_mqttUser").c_str(), getValue("_mqttPwd").c_str(),
+    (getValue("_mqttUser") + "/waterLevelTank/isOnline").c_str(), 1, true, "offline"
+    )) {
+      //Serial.println("connected");
+      mqttClient.publish((getValue("_mqttUser") + "/waterLevelTank/isOnline").c_str(), (const uint8_t*)"true", 4, true);
+      mqttClient.subscribe("#");
+    } else {
+      //Serial.print("failed, rc=");
+      //Serial.print(mqttClient.state());
+    }
+    #endif
 }
 void setupMqtt() {
   mqttClient.setCallback(mqttCallback);

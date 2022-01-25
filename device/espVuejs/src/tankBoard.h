@@ -1,3 +1,4 @@
+#define TANK_BOARD
 #include <Arduino.h>
 #include "webserver.h"
 #include "wifi.h"
@@ -13,9 +14,6 @@ bool ignoreSleep = false;
 void setup(void)
 {
   delay(111);
-  Serial.begin(115200);
-  //Serial.println("booted");
-
   setupStore();
   setOnStoreChange([](String id, String val, bool isChange)
                    {
@@ -26,57 +24,53 @@ void setup(void)
 
                      serializeJson(objData, ret);
                      webSocket.broadcastTXT(ret);
-                     mqttClient.publish((getValue("_mqttUser") + "/waterLevel/" + id).c_str(), (const uint8_t *)val.c_str(), val.length(), true); });
-
-  //Serial.println("findMaster");
+                     mqttClient.publish((getValue("_mqttUser") + "/waterLevelTank/" + id).c_str(), (const uint8_t *)val.c_str(), val.length(), true); });
 
   if(findMaster()){
     ignoreSleep = true;
   }
-  //Serial.print(ignoreSleep);
-  //Serial.println("findMaster done");
   setupWifi();
   setupWebserver();
   setupUpdate();
   setupWS();
   setupSystem();
+
   setupMqtt();
   setupTimer();
+
   setupFloatLevel();
-
-  loopFloatLevel();
-  loopBattery();
-  //Serial.println("wait to sleep ignoreSleep");
+  loopFloatLevel(true);
+  loopBattery(true);
+  String val = String(millis() + 1000);
+  mqttClient.publish((getValue("_mqttUser") + "/waterLevelTank/workTime").c_str(), (const uint8_t *)val.c_str(), val.length(), true);
   delay(1000);
-  //Serial.println("sleeped");
-
   if (!ignoreSleep && getBatteryVoltage() < 3.7) // sleep mode
   {
-    ESP.deepSleep(120e6);
+    ESP.deepSleep(210e6);
   }
   if (!ignoreSleep && getBatteryVoltage() < 3.8) // sleep mode
   {
-    ESP.deepSleep(100e6);
+    ESP.deepSleep(180e6);
   }
   if (!ignoreSleep && getBatteryVoltage() < 3.9) // sleep mode
   {
-    ESP.deepSleep(90e6);
+    ESP.deepSleep(150e6);
   }
   if (!ignoreSleep && getBatteryVoltage() < 4.0) // sleep mode
   {
-    ESP.deepSleep(60e6);
+    ESP.deepSleep(120e6);
   }
   if (!ignoreSleep && getBatteryVoltage() < 4.1) // sleep mode
   {
-    ESP.deepSleep(30e6);
+    ESP.deepSleep(90e6);
   }
   if (!ignoreSleep && getBatteryVoltage() < 4.2) // sleep mode
   {
-    ESP.deepSleep(15e6);
+    ESP.deepSleep(60e6);
   }
   if (!ignoreSleep && getBatteryVoltage() < 999) // sleep mode
   {
-    ESP.deepSleep(10e6);
+    ESP.deepSleep(30e6);
   }
 
   // setOnMqttIncome([](String topic, String msg){
