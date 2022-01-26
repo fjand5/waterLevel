@@ -71,12 +71,12 @@ void setup(void)
     delay(1000);
     setOnMqttIncome([](String topic, String msg)
                     {
-                        if (topic == "cafevongcat/waterLevel/lowLevel" && msg == "0")
+                        if (topic == "cafevongcat/waterLevelTank/lowLevel" && msg == "0")
                         {
                             ringTheBellTicker.attach_ms(100, ringTheBell);
                         }
 
-                        if (topic == "cafevongcat/waterLevel/lowLevel" && msg == "1")
+                        if (topic == "cafevongcat/waterLevelTank/lowLevel" && msg == "1")
                         {
                             ringTheBellTicker.detach();
                         }
