@@ -14,6 +14,10 @@ bool ignoreSleep = false;
 void setup(void)
 {
   delay(111);
+  if (getBatteryVoltage() < 3.7) // sleep mode
+  {
+    ESP.deepSleep(60e6);
+  }
   setupStore();
   setOnStoreChange([](String id, String val, bool isChange)
                    {
@@ -44,33 +48,30 @@ void setup(void)
   String val = String(millis() + 1000);
   mqttClient.publish((getValue("_mqttUser") + "/waterLevelTank/workTime").c_str(), (const uint8_t *)val.c_str(), val.length(), true);
   delay(1000);
-  if (!ignoreSleep && getBatteryVoltage() < 3.7) // sleep mode
-  {
-    ESP.deepSleep(210e6);
-  }
+
   if (!ignoreSleep && getBatteryVoltage() < 3.8) // sleep mode
   {
-    ESP.deepSleep(180e6);
+    ESP.deepSleep(600e6);
   }
   if (!ignoreSleep && getBatteryVoltage() < 3.9) // sleep mode
   {
-    ESP.deepSleep(150e6);
+    ESP.deepSleep(360e6);
   }
   if (!ignoreSleep && getBatteryVoltage() < 4.0) // sleep mode
   {
-    ESP.deepSleep(120e6);
+    ESP.deepSleep(300e6);
   }
   if (!ignoreSleep && getBatteryVoltage() < 4.1) // sleep mode
   {
-    ESP.deepSleep(90e6);
+    ESP.deepSleep(240e6);
   }
   if (!ignoreSleep && getBatteryVoltage() < 4.2) // sleep mode
   {
-    ESP.deepSleep(60e6);
+    ESP.deepSleep(180e6);
   }
   if (!ignoreSleep && getBatteryVoltage() < 999) // sleep mode
   {
-    ESP.deepSleep(30e6);
+    ESP.deepSleep(120e6);
   }
 
   // setOnMqttIncome([](String topic, String msg){
