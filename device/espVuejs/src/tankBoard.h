@@ -11,12 +11,16 @@
 #include "battery.h"
 #include "floatLevel.h"
 bool ignoreSleep = false;
+
+uint32_t *wakeCount;
 void setup(void)
 {
+  wakeCount = (uint32_t *)RTC_USER_MEM; // user RTC RAM area
+  wakeCount ++;
   delay(111);
   if (getBatteryVoltage() < 3.7) // sleep mode
   {
-    ESP.deepSleep(60e6);
+    ESP.deepSleep(1200e6);
   }
   setupStore();
   setOnStoreChange([](String id, String val, bool isChange)
@@ -30,7 +34,8 @@ void setup(void)
                      webSocket.broadcastTXT(ret);
                      mqttClient.publish((getValue("_mqttUser") + "/waterLevelTank/" + id).c_str(), (const uint8_t *)val.c_str(), val.length(), true); });
 
-  if(findMaster()){
+  if (findMaster())
+  {
     ignoreSleep = true;
   }
   setupWifi();
@@ -46,7 +51,10 @@ void setup(void)
   loopFloatLevel(true);
   loopBattery(true);
   String val = String(millis() + 1000);
+  String wakeCountStr = String((*wakeCount));
   mqttClient.publish((getValue("_mqttUser") + "/waterLevelTank/workTime").c_str(), (const uint8_t *)val.c_str(), val.length(), true);
+  mqttClient.publish((getValue("_mqttUser") + "/waterLevelTank/wakeCount").c_str(), (const uint8_t *)wakeCountStr.c_str(), wakeCountStr.length(), true);
+
   delay(1000);
 
   if (!ignoreSleep && getBatteryVoltage() < 3.8) // sleep mode
