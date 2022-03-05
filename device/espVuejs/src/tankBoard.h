@@ -16,7 +16,7 @@ uint32_t *wakeCount;
 void setup(void)
 {
   wakeCount = (uint32_t *)RTC_USER_MEM; // user RTC RAM area
-  wakeCount ++;
+  *wakeCount = (*wakeCount) + 1;
   delay(111);
   if (getBatteryVoltage() < 3.7) // sleep mode
   {
