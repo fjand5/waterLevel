@@ -11,15 +11,15 @@ bool setupFloatLevel()
     pinMode(HIGH_LEVEL_PIN, INPUT_PULLUP);
     pinMode(LOW_LEVEL_PIN, INPUT_PULLUP);
     delay(111);
-    if(getValue("highLevel") == String(digitalRead(HIGH_LEVEL_PIN))
-    && getValue("lowLevel") == String(digitalRead(LOW_LEVEL_PIN))
-    ){
+    if (getValue("highLevel") == String(digitalRead(HIGH_LEVEL_PIN)) && getValue("lowLevel") == String(digitalRead(LOW_LEVEL_PIN)))
+    {
         ret = false;
-    }else{
+    }
+    else
+    {
         ret = true;
     }
     return ret;
-
 }
 uint32_t floatLevelTimer = millis();
 void loopFloatLevel(bool now = false)
@@ -31,4 +31,12 @@ void loopFloatLevel(bool now = false)
         setValue("lowLevel", String(digitalRead(LOW_LEVEL_PIN)));
         floatLevelTimer = millis();
     }
+}
+bool getLowLevel()
+{
+    return digitalRead(LOW_LEVEL_PIN);
+}
+bool getHighLevel()
+{
+    return digitalRead(HIGH_LEVEL_PIN);
 }

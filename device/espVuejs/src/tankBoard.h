@@ -12,16 +12,44 @@
 #include "floatLevel.h"
 bool ignoreSleep = false;
 
-uint32_t *wakeCount;
+typedef struct
+{
+  uint32_t wakeCount;
+  float lastVoltage;
+  bool lastHighFloat;
+  bool lastLowFloat;
+} SystemStatus;
+SystemStatus *systemStatus;
+bool isStatusChange = false;
 void setup(void)
 {
-  wakeCount = (uint32_t *)RTC_USER_MEM; // user RTC RAM area
-  *wakeCount = (*wakeCount) + 1;
+  systemStatus = (SystemStatus *)RTC_USER_MEM; // user RTC RAM area
   delay(111);
-  if (getBatteryVoltage() < 3.7) // sleep mode
+  if (getBatteryVoltage() < 3.7) // bảo vệ pin
   {
     ESP.deepSleep(1200e6);
   }
+  systemStatus->wakeCount += +1;
+
+  if (abs(systemStatus->lastVoltage - getBatteryVoltage()) > 0.05)
+  {
+    systemStatus->lastVoltage = getBatteryVoltage();
+    isStatusChange = true;
+  }
+  if(systemStatus->lastLowFloat != getLowLevel())  
+  {
+    systemStatus->lastLowFloat = getLowLevel();
+    isStatusChange = true;
+  }
+
+  if(systemStatus->lastHighFloat != getHighLevel())  
+  {
+    systemStatus->lastHighFloat = getHighLevel();
+    isStatusChange = true;
+  }
+  if(isStatusChange == false) // Nếu không có gì thay đổi thì ngủ tiếp 2 phút
+    ESP.deepSleep(120e6);
+
   setupStore();
   setOnStoreChange([](String id, String val, bool isChange)
                    {
@@ -50,8 +78,8 @@ void setup(void)
   setupFloatLevel();
   loopFloatLevel(true);
   loopBattery(true);
-  String val = String(millis() + 1000);
-  String wakeCountStr = String((*wakeCount));
+  String val = String(millis() + 1000) + " (ms)";
+  String wakeCountStr = String(systemStatus->wakeCount);
   mqttClient.publish((getValue("_mqttUser") + "/waterLevelTank/workTime").c_str(), (const uint8_t *)val.c_str(), val.length(), true);
   mqttClient.publish((getValue("_mqttUser") + "/waterLevelTank/wakeCount").c_str(), (const uint8_t *)wakeCountStr.c_str(), wakeCountStr.length(), true);
 
