@@ -18,6 +18,7 @@ typedef struct
   float lastVoltage;
   bool lastHighFloat;
   bool lastLowFloat;
+  uint32_t timeStamp;
 } SystemStatus;
 SystemStatus *systemStatus;
 bool isStatusChange = false;
@@ -25,8 +26,10 @@ void setup(void)
 {
   systemStatus = (SystemStatus *)RTC_USER_MEM; // user RTC RAM area
   delay(111);
+  setupFloatLevel();
   if (getBatteryVoltage() < 3.7) // bảo vệ pin
   {
+    systemStatus->timeStamp += 1200e6;
     ESP.deepSleep(1200e6);
   }
   systemStatus->wakeCount += +1;
@@ -48,6 +51,7 @@ void setup(void)
     isStatusChange = true;
   }
   if(isStatusChange == false) // Nếu không có gì thay đổi thì ngủ tiếp 2 phút
+    systemStatus->timeStamp += 120e3;
     ESP.deepSleep(120e6);
 
   setupStore();
@@ -74,39 +78,52 @@ void setup(void)
 
   setupMqtt();
   setupTimer();
-
-  setupFloatLevel();
+  if(gotTime){
+    uint32_t timeStamp = timeClient.getSeconds() * 1000;
+    timeStamp = timeClient.getMinutes() * 1000 * 60;
+    timeStamp = timeClient.getHours() * 1000 * 60 * 24;
+    systemStatus->timeStamp = timeStamp;
+  }
   loopFloatLevel(true);
   loopBattery(true);
   String val = String(millis() + 1000) + " (ms)";
   String wakeCountStr = String(systemStatus->wakeCount);
+  String timeStampStr = String(systemStatus->timeStamp);
+
   mqttClient.publish((getValue("_mqttUser") + "/waterLevelTank/workTime").c_str(), (const uint8_t *)val.c_str(), val.length(), true);
   mqttClient.publish((getValue("_mqttUser") + "/waterLevelTank/wakeCount").c_str(), (const uint8_t *)wakeCountStr.c_str(), wakeCountStr.length(), true);
+  mqttClient.publish((getValue("_mqttUser") + "/waterLevelTank/timeStamp").c_str(), (const uint8_t *)timeStampStr.c_str(), timeStampStr.length(), true);
 
   delay(1000);
 
   if (!ignoreSleep && getBatteryVoltage() < 3.8) // sleep mode
   {
+    systemStatus->timeStamp += 600e6;
     ESP.deepSleep(600e6);
   }
   if (!ignoreSleep && getBatteryVoltage() < 3.9) // sleep mode
   {
+    systemStatus->timeStamp += 360e6;
     ESP.deepSleep(360e6);
   }
   if (!ignoreSleep && getBatteryVoltage() < 4.0) // sleep mode
   {
+    systemStatus->timeStamp += 300e6;
     ESP.deepSleep(300e6);
   }
   if (!ignoreSleep && getBatteryVoltage() < 4.1) // sleep mode
   {
+    systemStatus->timeStamp += 240e6;
     ESP.deepSleep(240e6);
   }
   if (!ignoreSleep && getBatteryVoltage() < 4.2) // sleep mode
   {
+    systemStatus->timeStamp += 180e6;
     ESP.deepSleep(180e6);
   }
   if (!ignoreSleep && getBatteryVoltage() < 999) // sleep mode
   {
+    systemStatus->timeStamp += 120e3;
     ESP.deepSleep(120e6);
   }
 
