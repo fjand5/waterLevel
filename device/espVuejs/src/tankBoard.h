@@ -21,38 +21,54 @@ typedef struct
   uint32_t timeStamp;
 } SystemStatus;
 SystemStatus *systemStatus;
+void sleep(uint32_t seconds){
+    systemStatus->timeStamp += seconds;
+    // Serial.println();
+    // Serial.print("sleeped: ");
+
+    // Serial.println(systemStatus->timeStamp);
+    // Serial.print(seconds);
+
+    ESP.deepSleep(seconds * 1e6);
+}
 bool isStatusChange = false;
 void setup(void)
 {
   systemStatus = (SystemStatus *)RTC_USER_MEM; // user RTC RAM area
+  systemStatus->wakeCount += +1;
   delay(111);
+  // Serial.begin(115200);
   setupFloatLevel();
   if (getBatteryVoltage() < 3.7) // bảo vệ pin
   {
-    systemStatus->timeStamp += 1200e6;
-    ESP.deepSleep(1200e6);
+    sleep(1200);
   }
-  systemStatus->wakeCount += +1;
 
   if (abs(systemStatus->lastVoltage - getBatteryVoltage()) > 0.05)
   {
     systemStatus->lastVoltage = getBatteryVoltage();
     isStatusChange = true;
   }
-  if(systemStatus->lastLowFloat != getLowLevel())  
+  if (systemStatus->lastLowFloat != getLowLevel())
   {
     systemStatus->lastLowFloat = getLowLevel();
     isStatusChange = true;
   }
 
-  if(systemStatus->lastHighFloat != getHighLevel())  
+  if (systemStatus->lastHighFloat != getHighLevel())
   {
     systemStatus->lastHighFloat = getHighLevel();
     isStatusChange = true;
   }
-  if(isStatusChange == false) // Nếu không có gì thay đổi thì ngủ tiếp 2 phút
-    systemStatus->timeStamp += 120e3;
-    ESP.deepSleep(120e6);
+  // Nếu không có gì thay đổi thì ngủ tiếp 2 phút
+  // Nhưng ngủ quá 15 lần thì nhất định phải chạy tiếp
+  if (isStatusChange == false // không có gì thay đổi
+   &&  (systemStatus->wakeCount % 15 != 0) // ngủ quá 15 lần
+   
+   ) 
+  {
+    sleep(120);
+  }
 
   setupStore();
   setOnStoreChange([](String id, String val, bool isChange)
@@ -62,7 +78,7 @@ void setup(void)
                      objData[id] = val.toFloat();
                      String ret;
 
-                     serializeJson(objData, ret);
+                    //  serializeJson(objData, ret);
                      webSocket.broadcastTXT(ret);
                      mqttClient.publish((getValue("_mqttUser") + "/waterLevelTank/" + id).c_str(), (const uint8_t *)val.c_str(), val.length(), true); });
 
@@ -78,10 +94,11 @@ void setup(void)
 
   setupMqtt();
   setupTimer();
-  if(gotTime){
-    uint32_t timeStamp = timeClient.getSeconds() * 1000;
-    timeStamp = timeClient.getMinutes() * 1000 * 60;
-    timeStamp = timeClient.getHours() * 1000 * 60 * 24;
+  if (gotTime)
+  {
+    uint32_t timeStamp = timeClient.getSeconds();
+    timeStamp = timeClient.getMinutes() * 60;
+    timeStamp = timeClient.getHours()* 60 * 24;
     systemStatus->timeStamp = timeStamp;
   }
   loopFloatLevel(true);
@@ -98,59 +115,28 @@ void setup(void)
 
   if (!ignoreSleep && getBatteryVoltage() < 3.8) // sleep mode
   {
-    systemStatus->timeStamp += 600e6;
-    ESP.deepSleep(600e6);
+    sleep(600);
   }
   if (!ignoreSleep && getBatteryVoltage() < 3.9) // sleep mode
   {
-    systemStatus->timeStamp += 360e6;
-    ESP.deepSleep(360e6);
+    sleep(360);
   }
   if (!ignoreSleep && getBatteryVoltage() < 4.0) // sleep mode
   {
-    systemStatus->timeStamp += 300e6;
-    ESP.deepSleep(300e6);
+    sleep(300);
   }
   if (!ignoreSleep && getBatteryVoltage() < 4.1) // sleep mode
   {
-    systemStatus->timeStamp += 240e6;
-    ESP.deepSleep(240e6);
+    sleep(240);
   }
   if (!ignoreSleep && getBatteryVoltage() < 4.2) // sleep mode
   {
-    systemStatus->timeStamp += 180e6;
-    ESP.deepSleep(180e6);
+    sleep(180);
   }
   if (!ignoreSleep && getBatteryVoltage() < 999) // sleep mode
   {
-    systemStatus->timeStamp += 120e3;
-    ESP.deepSleep(120e6);
+    sleep(120);
   }
-
-  // setOnMqttIncome([](String topic, String msg){
-  //   //Serial.println(topic + ": "+ msg);
-  //   DynamicJsonDocument doc(512);
-  //   auto error = deserializeJson(doc, msg);
-  //   if(error)
-  //     return;
-  //   JsonObject objData = doc.as<JsonObject>();
-  //   String id = objData["id"];
-  //   if(id.startsWith("schedule"))
-  //     setValue(id, objData["value"], true);
-  //   else
-  //     setValue(id, objData["value"]);
-
-  // });
-  // setOnWSTextIncome([](String msg){
-  //   //Serial.println(msg);
-  //   DynamicJsonDocument doc(512);
-  //   auto error = deserializeJson(doc, msg);
-  //   if(error)
-  //     return;
-  //   JsonObject objData = doc.as<JsonObject>();
-  //   String id = objData["id"];
-  //     setValue(id, objData["value"], true);
-  // });
 }
 void loop(void)
 {
